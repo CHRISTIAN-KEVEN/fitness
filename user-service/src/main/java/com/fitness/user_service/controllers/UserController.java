@@ -5,15 +5,12 @@ import com.fitness.user_service.services.UserService;
 import com.fitness.user_service.utils.ResponseBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.tomcat.util.bcel.classfile.Constant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 
-import static com.fitness.user_service.utils.Constants.DEFAULT_PAGE_START;
-import static org.springframework.beans.support.PagedListHolder.DEFAULT_PAGE_SIZE;
 
 @RestController
 @RequestMapping("/api/users")
