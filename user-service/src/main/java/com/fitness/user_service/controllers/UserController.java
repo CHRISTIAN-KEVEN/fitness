@@ -42,7 +42,7 @@ public class UserController {
     }
 
     @GetMapping("/{userId}")
-    public ResponseEntity<ResponseBuilder<?>> register(@PathVariable String userId) {
+    public ResponseEntity<ResponseBuilder<?>> getUserProfile(@PathVariable String userId) {
         return ResponseEntity.ok(userService.getUser(userId));
     }
 }
