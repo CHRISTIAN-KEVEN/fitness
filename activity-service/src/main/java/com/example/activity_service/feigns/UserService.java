@@ -1,6 +1,7 @@
 package com.example.activity_service.feigns;
 
-import org.json.JSONObject;
+import com.example.activity_service.dtos.responses.ProxyResponse;
+import com.example.activity_service.dtos.responses.UserResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -9,5 +10,5 @@ import org.springframework.web.bind.annotation.PathVariable;
 public interface UserService {
 
     @GetMapping("/api/users/{userId}")
-    JSONObject getUserData(@PathVariable String userId);
+    ProxyResponse<UserResponse> getUserData(@PathVariable String userId);
 }

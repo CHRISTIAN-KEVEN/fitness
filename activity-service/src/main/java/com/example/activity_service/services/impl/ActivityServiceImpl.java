@@ -1,7 +1,10 @@
 package com.example.activity_service.services.impl;
 
+import com.example.activity_service.configs.RabbitMQConfig;
 import com.example.activity_service.dtos.requests.ActivityRequest;
 import com.example.activity_service.dtos.responses.ActivityResponse;
+import com.example.activity_service.dtos.responses.ProxyResponse;
+import com.example.activity_service.dtos.responses.UserResponse;
 import com.example.activity_service.feigns.UserService;
 import com.example.activity_service.models.Activity;
 import com.example.activity_service.repositories.ActivityRepository;
@@ -14,6 +17,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.tomcat.util.bcel.Const;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,13 +32,19 @@ public class ActivityServiceImpl implements ActivityService {
 
     private final ActivityRepository activityRepo;
     private final UserService userService;
+    private final RabbitTemplate rabbitTemplate;
+    private final RabbitMQConfig rabbitMQConfig;
 
     @Autowired
     private ActivityServiceImpl(ActivityRepository activityRepo,
-                                UserService userService) {
+                                UserService userService,
+                                RabbitTemplate rabbitTemplate,
+                                RabbitMQConfig rabbitMQConfig) {
 
         this.activityRepo = activityRepo;
         this.userService = userService;
+        this.rabbitTemplate = rabbitTemplate;
+        this.rabbitMQConfig = rabbitMQConfig;
     }
 
     @Override
@@ -43,13 +53,18 @@ public class ActivityServiceImpl implements ActivityService {
         LOG.info("Beginning adding data for activity tracking...");
 
         // Validate user existence
-        JSONObject userServiceReponse = userService.getUserData(activityReq.getUserId());
+        try {
+            ProxyResponse<UserResponse> userServiceReponse = userService.getUserData(activityReq.getUserId());
 
-        if(!Constants.SUCCESS.equals(userServiceReponse.optString(Constants.erc, "0"))) {
-            return ResponseBuilder.errorMsgReturn("Unable to verify user. Please try again later !");
-        }
-        if(userServiceReponse.getJSONArray("data").isEmpty()) {
-            return ResponseBuilder.errorMsgReturn("User with ID " + activityReq.getUserId() + " not found !");
+            if(userServiceReponse == null || !Constants.SUCCESS.equals(userServiceReponse.getErc())) {
+                return ResponseBuilder.errorMsgReturn("Unable to verify user. Please try again later !");
+            }
+            if(userServiceReponse.getData() == null) {
+                return ResponseBuilder.errorMsgReturn("User with ID " + activityReq.getUserId() + " not found !");
+            }
+        } catch (Exception ex) {
+            LOG.error(ex.getMessage());
+            return ResponseBuilder.errorMsgReturn("FAILED TO VERIFY USER DATA !");
         }
         Activity activity = new Activity();
         activity.setUserId(activityReq.getUserId());
@@ -60,7 +75,11 @@ public class ActivityServiceImpl implements ActivityService {
         activity.setAddtionalMetrics(activityReq.getAdditionMetrics());
 
         Activity savedActivity = activityRepo.save(activity);
-
+        try {
+            rabbitTemplate.convertAndSend(rabbitMQConfig.getExchangeName(), rabbitMQConfig.getRoutingKey(), savedActivity);
+        } catch (Exception ex) {
+            LOG.error("Failed to publish message to rabbitMQ", ex);
+        }
         LOG.info("Successfully added data for activity tracking !");
 
         return ResponseBuilder.dataReturn(Utilities.buildActivityResponse(savedActivity));
