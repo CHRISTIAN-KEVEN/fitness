@@ -6,4 +6,6 @@ public interface RecommendationService {
     ResponseBuilder<?> getRecommendations();
 
     ResponseBuilder<?> getUserRecommendations(String userId);
+
+    ResponseBuilder<?> getRecommendation(String recommendationId);
 }

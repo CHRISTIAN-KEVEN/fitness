@@ -32,4 +32,10 @@ public class RecommendationController {
     public ResponseEntity<ResponseBuilder<?>> getUserRecommendations(@PathVariable String userId){
         return ResponseEntity.ok(recommendationService.getUserRecommendations(userId));
     }
+
+    @GetMapping
+    @RequestMapping("/{recommendationId}")
+    public ResponseEntity<ResponseBuilder<?>> getRecommendation(@PathVariable String recommendationId){
+        return ResponseEntity.ok(recommendationService.getRecommendation(recommendationId));
+    }
 }

@@ -33,7 +33,7 @@ public class UserController {
     @GetMapping("")
     public ResponseEntity<ResponseBuilder<?>> getUsers(@RequestParam(required = false) Optional<Integer> start,
                                       @RequestParam(required = false) Optional<Integer> size,
-                                                       @RequestParam(required = false) Boolean usePageable) {
+                                                       @RequestParam(required = false) boolean usePageable) {
 
         if(usePageable) {
             return ResponseEntity.ok(userService.getUsersPageableVersion(start, size));

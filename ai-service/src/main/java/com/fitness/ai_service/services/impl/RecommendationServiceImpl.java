@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +29,23 @@ public class RecommendationServiceImpl implements RecommendationService {
             List<Recommendation> recommendationList = recommendationRepository.findByUserId(userId);
             log.info("User {} Recommendations {}", userId, recommendationList.toString());
             return ResponseBuilder.dataReturn(recommendationList);
+        } catch (Exception e) {
+            log.error("Failed to get user Recommendations", e);
+            return ResponseBuilder.errorMsgReturn("Failed to get user Recommendations");
+        }
+    }
+
+    @Override
+    public ResponseBuilder<?> getRecommendation(String recommendationId) {
+        try {
+            Optional<Recommendation> optRecommendation = recommendationRepository.findById(recommendationId);
+            log.info("Details for recommendation with ID {} - DETAILS : {}", recommendationId, optRecommendation);
+            if(optRecommendation.isPresent()) {
+                return ResponseBuilder.dataReturn(optRecommendation.get());
+            }
+            else {
+                return ResponseBuilder.successMsgReturn("No recommendation with ID " + recommendationId);
+            }
         } catch (Exception e) {
             log.error("Failed to get user Recommendations", e);
             return ResponseBuilder.errorMsgReturn("Failed to get user Recommendations");
