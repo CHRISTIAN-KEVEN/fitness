@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="INFO" monitorInterval="15">>
+    <Properties>
+        <Property name="logFileDir">LOGS</Property>
+        <Property name="rollingFileSize">10 MB</Property>
+        <Property name="rollingFileCount">100</Property>
+        <Property name="msgFormat">%d{yyyy-MM-dd HH:mm:ss} %-5level %c [%t] (%F:%M:%L) %m%n</Property>
+        <Property name="msgFormatConsole">%d{yyyy-MM-dd HH:mm:ss} %-5level %m%n</Property>
+        <Property name="additivity">false</Property>
+        <Property name="rollingFileName">%d{MM-dd-yyyy HHmmss}-%i.log.gz</Property>
+    </Properties>
+
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout
+                    pattern="%style{%d{ISO8601}}{black} %highlight{%-5level }[%style{%t}{bright,blue}] %style{%C{1.}}{bright,yellow}: %msg%n%throwable"/>
+        </Console>
+
+        <RollingFile name="RollingFileOrdersManagementServices"
+                     fileName="${logFileDir}/orders_management.log"
+                     filePattern="${logFileDir}/ORDERS_MANAGEMENT $${date:yyyy-MM}/orders_management-${rollingFileName}">
+            <PatternLayout>
+                <Pattern>${msgFormat}</Pattern>
+            </PatternLayout>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="${rollingFileSize}"/>
+            </Policies>
+            <DefaultRolloverStrategy max="${rollingFileCount}"/>
+        </RollingFile>
+        <RollingFile name="RollingFileAccessLog"
+                     fileName="${logFileDir}/access.log"
+                     filePattern="${logFileDir}/ACCESS $${date:yyyy-MM}/acess-${rollingFileName}">
+            <PatternLayout>
+                <Pattern>${msgFormat}</Pattern>
+            </PatternLayout>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="${rollingFileSize}"/>
+            </Policies>
+            <DefaultRolloverStrategy max="${rollingFileCount}"/>
+        </RollingFile>
+    </Appenders>
+
+    <Loggers>
+        <Logger name="org.potolo.orders" level="all" additivity="${additivity}">
+            <AppenderRef ref="RollingFileOrdersManagementServices"/>
+            <AppenderRef ref="Console"/>
+        </Logger>
+        <Logger name="ACCESS" level="all" additivity="${additivity}">
+            <AppenderRef ref="RollingFileAccessLog"/>
+            <AppenderRef ref="Console"/>
+        </Logger>
+
+        <Root level="info">
+            <AppenderRef ref="Console"/>
+        </Root>
+    </Loggers>
+</Configuration>

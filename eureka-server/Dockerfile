@@ -1,0 +1,13 @@
+FROM openjdk:17
+
+WORKDIR /app
+
+COPY src/main/resources/application.properties application.properties
+
+ARG JAR_FILE=target/*.jar
+
+COPY ${JAR_FILE} app.jar
+
+EXPOSE 10092
+
+ENTRYPOINT ["java", "-jar", "app.jar"]
