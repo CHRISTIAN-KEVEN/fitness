@@ -3,6 +3,7 @@ FROM openjdk:17
 WORKDIR /app
 
 COPY src/main/resources/application.properties application.properties
+COPY  log4j2.xml log4j2.xml
 
 ARG JAR_FILE=target/*.jar
 
